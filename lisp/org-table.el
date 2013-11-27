@@ -634,7 +634,14 @@ The command suggests a format depending on TABLE_EXPORT_FORMAT,
 whether it is set locally or up in the hierarchy, then on the
 extension of the given file name, and finally on the variable
 `org-table-export-default-format'."
-  (interactive)
+  (interactive (list (or (org-entry-get (point) "TABLE_EXPORT_FILE" t)
+			 (let ((file (read-file-name "Export table to: ")))
+			   (if (and (file-exists-p file)
+				    (not (y-or-n-p (format "Overwrite file %s? " file))))
+			       (user-error "File not written.")
+			     (if (y-or-n-p "Set TABLE_EXPORT_FILE ?")
+				 (org-entry-put (point) "TABLE_EXPORT_FILE" file))
+			     file)))))
   (unless (org-at-table-p) (user-error "No table at point"))
   (org-table-align) ;; make sure we have everything we need
   (let* ((beg (org-table-begin))
